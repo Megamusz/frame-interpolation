@@ -39,8 +39,8 @@ def readFlow(fn):
             else:
                 w = np.fromfile(f, np.int32, count=1)
                 h = np.fromfile(f, np.int32, count=1)
-                # print 'Reading %d x %d flo file\n' % (w, h)
-                data = np.fromfile(f, np.float32, count=2*w*h)
+                print(w, h)
+                data = np.fromfile(f, np.float32, count=int(2*w*h))
                 # Reshape data into 3D array (columns, rows, bands)
                 # The reshape here is for visualization, the original code is (w,h,2)
                 return np.resize(data, (int(h), int(w), 2))
@@ -329,3 +329,5 @@ def writeFlowAsColor(flow, color_file, kitti_color=False):
 def convFlo2Png(flow_file, rgb_file, kitti_color=False):
     flow = readFlow(flow_file)
     writeFlowAsColor(flow, rgb_file, kitti_color)
+
+    
