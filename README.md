@@ -7,8 +7,12 @@ check demo.m for example usage of the interpolation function
 
 Intermediate result from the demo example:
 
-![Original flow]https://github.com/Megamusz/frame-interpolation/raw/master/example/Original%20flow.png
-![Forward warping flow]https://github.com/Megamusz/frame-interpolation/raw/master/example/Foward%20warping%20flow.png
-![Interpolated flow]https://github.com/Megamusz/frame-interpolation/raw/master/example/Interpolated%20flow.png
-![Interpolated image]https://github.com/Megamusz/frame-interpolation/raw/master/example/Interpolated%20frame.png
-![Ground truth image]https://github.com/Megamusz/frame-interpolation/raw/master/example/frame10i11.png
+![Original flow](https://github.com/Megamusz/frame-interpolation/raw/master/example/Original%20flow.png)
+
+![Forward warping flow](https://github.com/Megamusz/frame-interpolation/raw/master/example/Foward%20warping%20flow.png)
+
+![Interpolated flow](https://github.com/Megamusz/frame-interpolation/raw/master/example/Interpolated%20flow.png)
+
+![Interpolated image](https://github.com/Megamusz/frame-interpolation/raw/master/example/Interpolated%20frame.png)
+
+![Ground truth image](https://github.com/Megamusz/frame-interpolation/raw/master/example/frame10i11.png)
