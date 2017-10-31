@@ -1,17 +1,32 @@
-clear;
-close all;
 
-flowfileName = 'flow10.flo';
-I0 = double(imread('frame10.png'));
-I1 = double(imread('frame11.png'));
+function interp = interp_frame(I0, I1, u0, t)
+% Interplate a frame based on previous(I0)/next frame(I1) and optical flow from I0 to I1
+% The interplation algorithm is based on "A Database and Evaluation
+% Methodology for Optical Flow"
+% 
+% Usage:
+% interp = interp_frame(PREVIOUS_FRAME, NEXT_FRAME, OPTICAL_FLOW)
+% interp = interp_frame(PREVIOUS_FRAME, NEXT_FRAME, OPTICAL_FLOW, t)
+%
+% PREVIOUS_FREAME/NEXT_FRAME is 3-channel rgb images (gray scaled image not
+% tested. 
+% OPTICAL_FLOW is a 2-channel, with first/second channel storing mvx/mvy 
+% the size of OPTICAL_FLOW should match with I0/I1
+% t is temporal distance t is in the range of (0, 1), default value is 0.5
+% 
 
-t = 0.5; %temporal distance t is in the range of (0, 1)
 
-u0 = flow_read(flowfileName);
+if nargin < 4
+    t = 0.5; %temporal distance t is in the range of (0, 1)
+end
+% check input size
+assert((size(I0, 1) == size(I1, 1)) && (size(I0, 2) == size(I1, 2)) && (size(I0, 1) == size(u0, 1)) && (size(I0, 2) == size(u0, 2)), 'I0/I1/u0 must have same cols&rows');
+
 
 % Fc = flowToColor(u0);
 % imshow(Fc);
 % title('Original flow');
+% imwrite(Fc, 'Original flow.png');
 
 % Step 1. 
 % Take the flow from I0 to I1 and forward warp (or splat)
@@ -25,9 +40,9 @@ height = size(u0, 1);
 xt = round(xx + t*u0(:,:,1));
 yt = round(yy + t*u0(:,:,2));
 
-% TODO simplify the following code
 % warpingCount = zeros(height, width);
 
+% TODO simplify the following code
 for j = 1:height
     for i = 1:width
         j1 = yt(j, i);
@@ -38,15 +53,19 @@ for j = 1:height
         end
     end
 end
-% occMask = warpingCount > 1;
-% figure;
-% imshow(occMask);
-% title('occMask');
 
-utc = flowToColor(ut);
-figure;
-imshow(utc)
-title('Foward warping flow');
+% occMask = warpingCount > 1;
+% missingMask = warpingCount == 0;
+% 
+% figure;
+% imshow([occMask missingMask]);
+% title('occMask/missingMask');
+% 
+% utc = flowToColor(ut);
+% figure;
+% imshow(utc)
+% imwrite(utc, 'Foward warping flow.png');
+% title('Foward warping flow');
 
 
 % Step 2. 
@@ -55,13 +74,12 @@ title('Foward warping flow');
 uti = outside_in_fill(ut);
 % uti = scanline_in_fill(ut, 1);
 % uti = ut;
+
+
 % figure;
-% missingMask = isnan(ut(:,:,1));
-% imshow(missingMask);
-% 
-figure;
-imshow(flowToColor(uti));
-title('Interpolated flow');
+% imshow(flowToColor(uti));
+% imwrite(flowToColor(uti, 17.6), 'Interpolated flow.png');
+% title('Interpolated flow');
 
 % Step 3.
 % Fetch the corresponding intensity values from both the
@@ -83,6 +101,9 @@ for c = 1:3
 %     It1(:,:,c) = interp2(I1(:, :, c), xt1, yt1);
     It(:,:,c) = uint8((1-t)* interp2(I0(:, :, c), xt0, yt0) + t*interp2(I1(:, :, c), xt1, yt1));
 end
+
+interp = It;
+
 % nanPos = isnan(uti);
 % nanPos = repmat(nanPos, [1, 1, 2]);
 % nanPos = nanPos(:, :, 1:3);
@@ -91,21 +112,26 @@ end
 % occPos = repmat(occMask, [1, 1, 3]);
 % It(occPos) = I0(occPos);
 
-figure;
-imshow(uint8(It));
-Igt = imread('frame10i11.png');
+% figure;
+% imshow(uint8(It));
+% Igt = imread('frame10i11.png');
+% 
+% title(['Interpolated frame, psnr: ', num2str(psnr(Igt, It))]);
+% imwrite(It, 'Interpolated frame.png');
 
-title(['Interpolated frame, psnr: ', num2str(psnr(Igt, It))]);
 % figure;
 % imshow(It0);
 % figure;
 % imshow(It1);
 
-err = Igt - It;
-figure;
-imshow(uint8(err.^2));
-title('error map');
+% err = Igt - It;
+% figure;
+% imshow(uint8(err.^2));
+% title('error map');
+% imwrite(uint8(err.^2), 'error map.png');
+end
 
+% the outside-in filling algorithm descriped in the paper. 
 function output = outside_in_fill(input)
 
     rows = size(input, 1);
