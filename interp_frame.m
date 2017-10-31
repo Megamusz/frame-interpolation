@@ -8,8 +8,7 @@ function interp = interp_frame(I0, I1, u0, t)
 % interp = interp_frame(PREVIOUS_FRAME, NEXT_FRAME, OPTICAL_FLOW)
 % interp = interp_frame(PREVIOUS_FRAME, NEXT_FRAME, OPTICAL_FLOW, t)
 %
-% PREVIOUS_FREAME/NEXT_FRAME is 3-channel rgb images (gray scaled image not
-% tested. 
+% PREVIOUS_FREAME/NEXT_FRAME is 3-channel rgb or grayscale images 
 % OPTICAL_FLOW is a 2-channel, with first/second channel storing mvx/mvy 
 % the size of OPTICAL_FLOW should match with I0/I1
 % t is temporal distance t is in the range of (0, 1), default value is 0.5
@@ -96,7 +95,7 @@ It = uint8(zeros(size(I0)));
 % It0 = uint8(zeros(size(I0)));
 % It1 = uint8(zeros(size(I0)));
 
-for c = 1:3
+for c = 1:size(I0, 3)
 %     It0(:,:,c) = interp2(I0(:, :, c), xt0, yt0);
 %     It1(:,:,c) = interp2(I1(:, :, c), xt1, yt1);
     It(:,:,c) = uint8((1-t)* interp2(I0(:, :, c), xt0, yt0) + t*interp2(I1(:, :, c), xt1, yt1));
