@@ -1,5 +1,5 @@
 
-function interp = interp_frame(I0, I1, u0, t)
+function interp = interp_frame(I0, I1, u0, t, occ_detect)
 % Interplate a frame based on previous(I0)/next frame(I1) and optical flow from I0 to I1
 % The interplation algorithm is based on "A Database and Evaluation
 % Methodology for Optical Flow"
@@ -17,6 +17,10 @@ function interp = interp_frame(I0, I1, u0, t)
 
 if nargin < 4
     t = 0.5; %temporal distance t is in the range of (0, 1)
+end
+
+if nargin < 5
+    occ_detect = false;
 end
 % check input size
 assert((size(I0, 1) == size(I1, 1)) && (size(I0, 2) == size(I1, 2)) && (size(I0, 1) == size(u0, 1)) && (size(I0, 2) == size(u0, 2)), 'I0/I1/u0 must have same cols&rows');
@@ -41,13 +45,26 @@ yt = round(yy + t*u0(:,:,2));
 
 % warpingCount = zeros(height, width);
 
+if occ_detect
+    similarity = Inf(size(u0));
+end
 % TODO simplify the following code
 for j = 1:height
     for i = 1:width
         j1 = yt(j, i);
         i1 = xt(j, i);
         if(i1 >=1 && i1 <= width && j1>=1 && j1<= height)
-            ut(j1, i1, :) = u0(j, i, :);
+         
+            if(occ_detect)
+                e = (I1(j1, i1, :) - I0(j, i, :)).^2;
+                s = sum(e(:));
+                if( s < similarity(j1, i1) )
+                    ut(j1, i1, :) = u0(j, i, :);
+                    similarity(j1, i1) = s;
+                end
+            else
+                ut(j1, i1, :) = u0(j, i, :);
+            end
 %             warpingCount(j1, i1) = warpingCount(j1, i1) + 1;
         end
     end
